@@ -82,14 +82,21 @@ var GameLayer = cc.LayerColor.extend({
     actionWithKeyEvent:function(keyEvent) {
         var isA = keyEvent.keyCode == 65;
         var isD = keyEvent.keyCode == 68;
-        var rota = this._currentManualReflector.getRotation();
+        var rota = 0; //this._currentManualReflector.getRotation();
+        var delta = M_PI / 48;
         if (isA) {
-            rota += M_PI / 48;
+            rota = delta;
         } else if (isD) {
-            rota -= M_PI / 48;
+            rota = -delta;
         }
-        this._currentManualReflector.setRotation(rota);
+        // this._currentManualReflector.setRotation(rota);
         // this._currentManualReflector.runAction()
+        rota = this._currentManualReflector.getRotation() + rota;
+        rota = Math.round(rota / delta) * delta;
+
+        var rotaByAction = cc.rotateTo(0.25, -rota / M_PI * 180);
+        this._currentManualReflector.stopAllActions();
+        this._currentManualReflector.runAction(rotaByAction);
     },
     ctor:function() {
         this._super(cc.color(0, 40, 45, 255));
@@ -110,7 +117,7 @@ var GameLayer = cc.LayerColor.extend({
     setCurrentManualReflector:function(reflector) {
         this._currentManualReflector = reflector;
         if (this._currentReflectorIndicator == null) {
-            this._currentReflectorIndicator = new BaseSprite("Textures/Empty.png");
+            this._currentReflectorIndicator = new NoHitSprite("Textures/Empty.png");
             this._currentReflectorIndicator._className = "";
             this.addChild(this._currentReflectorIndicator);
         }
@@ -119,7 +126,9 @@ var GameLayer = cc.LayerColor.extend({
     loadObjectsFromFile:function() {
         var myLayer = this;
         var randomValue = Math.floor(Math.random() * 13 + 1);
+        // randomValue = 13;
         var missionFile = "Configs/mission" + randomValue +".json";
+        // missionFile = "Configs/mission2.json";
         var req = new XMLHttpRequest();
         req.open("GET", missionFile, true);
         req.send(null);
@@ -262,6 +271,11 @@ var BaseSprite = cc.Sprite.extend({
     }
 });
 
+var NoHitSprite = BaseSprite.extend({
+    _className:"NoHitSprite",
+    _typeName:"NoHitSprite",
+});
+
 var BlockType = {
     Chip:0,
     Resistance:1
@@ -269,6 +283,7 @@ var BlockType = {
 
 var NormalBlock = BaseSprite.extend({
     changedTexture:false,
+    _typeName:"NormalBlock",
     myType:0,
     myFacing:0,
     ctor:function(facing, type) {
@@ -281,13 +296,71 @@ var NormalBlock = BaseSprite.extend({
             facing = DirectionFacing.Right;
         }
         if (facing == DirectionFacing.Up) {
-            this.setRotation(M_PI / 2);
+            this.setRotation(M_PI_2);
         }
         this.myType = type;
         this.myFacing = facing;
     },
     run:function() {
+        if (this.myType == BlockType.Chip && !this.changedTexture) {
+            this.changedTexture = true;
+            var hasLeft = false;
+            var hasRight = false;
+            var hasTop = false;
+            var hasBottom = false;
+            var leftPoint = zz.pointOffset(this.getPosition(), -OBJ_BLOCK_WIDTH, 0);
+            var rightPoint = zz.pointOffset(this.getPosition(), OBJ_BLOCK_WIDTH, 0);
+            var topPoint = zz.pointOffset(this.getPosition(), 0, OBJ_BLOCK_WIDTH);
+            var bottomPoint = zz.pointOffset(this.getPosition(), 0, -OBJ_BLOCK_WIDTH);
+            var children = this.getParent().getChildren();
 
+            for (let i in children) {
+                var node = children[i];
+                if (node === this) {
+                    continue;
+                }
+                if (node.isClass("BaseSprite") && node.isType("NormalBlock")) {
+                    if (node.myType == this.myType) {
+                        var rect = node.getRect();
+                        if (cc.rectContainsPoint(rect, leftPoint)) {
+                            hasLeft = true;
+                        }
+                        if (cc.rectContainsPoint(rect, rightPoint)) {
+                            hasRight = true;
+                        }
+                        if (cc.rectContainsPoint(rect, topPoint)) {
+                            hasTop = true;
+                        }
+                        if (cc.rectContainsPoint(rect, bottomPoint)) {
+                            hasBottom = true;
+                        }
+                    }
+                }
+            }
+
+            if ((!hasLeft && !hasRight && this.myFacing == DirectionFacing.Right) ||
+                !hasTop && !hasBottom && this.myFacing == DirectionFacing.Up) {
+                this.initWithFile("Textures/NormalBlockChipSmall.png");
+            } else if (this.myFacing == DirectionFacing.Right) {
+                if (!(hasLeft && hasRight) && (hasLeft || hasRight)) {
+                    this.initWithFile("Textures/NormalBlockChipHead.png");
+                    if (hasLeft) {
+                        this.setRotation(0);
+                    } else {
+                        this.setRotation(M_PI);
+                    }
+                }
+            } else if (this.myFacing == DirectionFacing.Up) {
+                if (!(hasTop && hasBottom) && (hasTop || hasBottom)) {
+                    this.initWithFile("Textures/NormalBlockChipHead.png");
+                    if (hasBottom) {
+                        this.setRotation(M_PI_2);
+                    } else {
+                        this.setRotation(-M_PI_2);
+                    }
+                }
+            }
+        }
     }
 });
 
@@ -335,11 +408,13 @@ var NormalReflector = BaseReflector.extend({
         return this.getRotation() - (M_PI / 4);
     },
     isPointInDarkSide:function(point) {
-        return false;
+        // return false;
         var myPosition = this.getPosition();
-        var pointInMe = zz.pointOffset(point, -myPosition.x, -myPosition.y);
-        var rotatedPoint = zz.pointRotateVector(pointInMe, -this.getRotation());
-        return (rotatedPoint.x * -1) - 1 > rotatedPoint.y;
+        var pointOffset = zz.pointOffset(point, -myPosition.x, -myPosition.y);
+        var rotatedPoint = zz.pointRotateVector(pointOffset, -this.getRotation());
+        // var pointInMe = zz.pointOffset(rotatedPoint, -myPosition.x, -myPosition.y);
+        var testP = rotatedPoint;
+        return (testP.x * -1) - 1 > testP.y;
     },
 });
 
@@ -391,9 +466,23 @@ var AutoReflector = BaseReflector.extend({
     }
 });
 
+let packetLife = 150.0;
+
 var BasePacket = BaseSprite.extend({
     _hits:0,
     _dying:false,
+    _explosionFileName:null,
+    _tintSprite:null,
+    _tintFileName:null,
+    ctor:function(filename) {
+        this._super(filename);
+        if (this._tintFileName) {
+            this._tintSprite = new BaseSprite(this._tintFileName);
+            this._tintSprite.setPosition(this.getSize().width /2, this.getSize().height / 2);
+            this._tintSprite.setOpacity(0);
+            this.addChild(this._tintSprite);
+        }
+    },
     getHurt:function() {
         if (this._dying) {
             return;
@@ -402,8 +491,22 @@ var BasePacket = BaseSprite.extend({
         var anchor = cc.p(0.5 + shakeValue * cc.randomMinus1To1(), 0.5 + shakeValue * cc.randomMinus1To1());
         this.setAnchorPoint(anchor);
         this._hits ++;
-        if (this._hits > 100) {
+        if (this._tintSprite) {
+            this._tintSprite.setOpacity((this._hits / packetLife) * 255);
+        }
+        if (this._hits > packetLife) {
             this._dying = true;
+            if (this._explosionFileName) {
+                var explos = new NoHitSprite(this._explosionFileName);
+                explos.setPosition(this.getPosition());
+                this.getParent().addChild(explos);
+                explos.setScale(0.5);
+                var spawn = cc.spawn(cc.scaleTo(0.25, 1.5), cc.fadeOut(0.25));
+                var finish = cc.callFunc(function(){
+                    explos.removeFromParent();
+                });
+                explos.runAction(cc.sequence(spawn, finish));
+            }
             this.removeFromParent();
             this.didFinishCrash();
         }
@@ -423,6 +526,8 @@ var BasePacket = BaseSprite.extend({
 
 var DataPacket = BasePacket.extend({
     _typeName:"DataPacket",
+    _explosionFileName:"Textures/CyanExplosion.png",
+    _tintFileName:"Textures/DataPacketTint.png",
     ctor:function() {
         this._super("Textures/DataPacket.png");
     }
@@ -430,6 +535,8 @@ var DataPacket = BasePacket.extend({
 
 var FirePacket = BasePacket.extend({
     _typeName:"FirePacket",
+    _explosionFileName:"Textures/RedExplosion.png",
+    _tintFileName:"Textures/FirePacketTint.png",
     ctor:function() {
         this._super("Textures/FirePacket.png");
     },

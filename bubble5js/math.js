@@ -39,7 +39,7 @@ var zz = zz || {};
 
 // points 
 zz.pointNotFound = function() {
-    return cc.p(-1234567, -1234567);
+    return cc.p(-100, -100);
 };
 
 zz.distanceFromPoints = function(p1, p2) {
@@ -58,7 +58,7 @@ zz.pointOffset = function(point, dx, dy) {
 
 zz.pointRotateVector = function(vector, radius) {
     var x = vector.x * cos(radius) - vector.y * sin(radius);
-    var y = vector.x * sin(radius) + vector.y * sin(radius);
+    var y = vector.x * sin(radius) + vector.y * cos(radius);
     return cc.p(x, y);
 };
 
@@ -121,12 +121,13 @@ zz.pointIntersectionFromRectToLine = function(rect, line) {
 
     for (let i in lines) {
         var tl = lines[i];
-        var intersectPoint = zz.pointIntersectionFromLines(line, tl);
+        var intersectPoint = zz.pointIntersectionFromLines(tl, line);
         if (cc.rectContainsPoint(biggerRect, intersectPoint)) {
             var dist = zz.distanceFromPoints(cc.p(line.x, line.y), intersectPoint);
             var cosdx = (intersectPoint.x - line.x) / dist;
             var sindy = (intersectPoint.y - line.y) / dist;
-            if ((cosdx * cos(line.alpha)) >= 0 && (sindy * sin(line.alpha)) >= 0) {
+            // 判断方向！！！ 填0有误差！！
+            if (((cosdx * cos(line.alpha)) >= -0.1) && ((sindy * sin(line.alpha)) >= -0.1)) {
                 if (dist < minDistance) {
                     minDistance = dist;
                     selectedPoint = intersectPoint;
