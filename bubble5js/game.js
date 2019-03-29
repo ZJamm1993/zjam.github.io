@@ -48,6 +48,8 @@ window.onload = function(){
     cc.game.run("gameCanvas");
 };
 
+var isGameOver = false;
+
 var GameLayer = cc.LayerColor.extend({
     _currentManualReflector:null,
     _currentReflectorIndicator:null,
@@ -181,9 +183,13 @@ var GameLayer = cc.LayerColor.extend({
         };
     },
     update:function(dt) {
+        if (isGameOver) {
+            return;
+        }
         // check game over
         var gameover = currentDiedTime > 2;
         if (gameover) {
+            isGameOver = true;
             location.reload();
             return;
         }
@@ -206,6 +212,7 @@ var GameLayer = cc.LayerColor.extend({
             }
         }
         if (totalDataPacketCount > 0 && leftDataPacketCount <= 0) {
+            isGameOver = true;
             location.reload();
             return;
         }
