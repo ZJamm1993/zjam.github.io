@@ -19,7 +19,7 @@ var currentGameLayer = null;
 var currentDiedTime = 0;
 var totalDataPacketCount = 0;
 
-window.onkeydown=function(){
+window.onkeydown = function(){
     // if(13 == event.keyCode){
         // console.log('browser is not ie and enter key down' + event.keyCode);
     // }
@@ -30,6 +30,11 @@ window.onkeydown=function(){
 
 window.onload = function(){
     cc.game.onStart = function(){
+
+        // cc.view.setDesignResolutionSize(1024, 576, cc.ResolutionPolicy.EXACT_FIT);
+        // cc.view.setResizeCallback(function() {
+        //     cc.view.setDesignResolutionSize(1024, 576, cc.ResolutionPolicy.EXACT_FIT);
+        // });
         //load resources
         cc.LoaderScene.preload([], function () {
             var MyScene = cc.Scene.extend({
@@ -46,6 +51,7 @@ window.onload = function(){
         }, this);
     };
     cc.game.run("gameCanvas");
+
 };
 
 var isGameOver = false;
@@ -55,17 +61,22 @@ var GameLayer = cc.LayerColor.extend({
     _currentReflectorIndicator:null,
     onEnter:function() {
         this._super();
-        var myLayer = this;
-        var listener = cc.EventListener.create({
-            event:cc.EventListener.TOUCH_ONE_BY_ONE,
-            onTouchBegan:myLayer.onTouchBegan,
-        });
-        cc.eventManager.addListener(listener, myLayer);
+        this.addTouchAction();
     },
-    onTouchBegan:function(touch, event) {
-        var myLayer = event.getCurrentTarget();
-        var point = touch.getLocation();
-        var children = myLayer.getChildren();
+    addTouchAction:function() {
+        var myLayer = this;
+        cc.eventManager.addListener(cc.EventListener.create({
+            event:cc.EventListener.TOUCH_ONE_BY_ONE,
+            onTouchBegan:function(event) {
+                console.log("onMouseDown");
+                var point = event.getLocation();
+                myLayer.didTouchOnPoint(point);
+                return true;
+            },
+        }), myLayer);
+    },
+    didTouchOnPoint:function(point) {
+        var children = this.getChildren();
         var testObjs = new Array();
         var particles = new Array();
         for (let index in children) {
@@ -74,8 +85,8 @@ var GameLayer = cc.LayerColor.extend({
                 if (child._reflectorType == "ManualReflector") {
                     var rect = child.getRect();
                     if (cc.rectContainsPoint(rect, point)) {
-                        myLayer.setCurrentManualReflector(child);
-                        break;
+                        this.setCurrentManualReflector(child);
+                        return;
                     }
                 }
             }
@@ -99,8 +110,12 @@ var GameLayer = cc.LayerColor.extend({
         var rotaByAction = cc.rotateTo(0.25, -rota / M_PI * 180);
         this._currentManualReflector.stopAllActions();
         this._currentManualReflector.runAction(rotaByAction);
+        /* 
+        this._currentManualReflector.setRotation(rota);
+        // */
     },
     ctor:function() {
+        // this._super();
         this._super(cc.color(0, 40, 45, 255));
         // var size = cc.director.getWinSize();
 
@@ -130,7 +145,7 @@ var GameLayer = cc.LayerColor.extend({
         var randomValue = Math.floor(Math.random() * 13 + 1);
         // randomValue = 13;
         var missionFile = "Configs/mission" + randomValue +".json";
-        // missionFile = "Configs/mission2.json";
+        // missionFile = "Configs/test.txt";
         var req = new XMLHttpRequest();
         req.open("GET", missionFile, true);
         req.send(null);
@@ -194,10 +209,8 @@ var GameLayer = cc.LayerColor.extend({
             return;
         }
 
-        // console.log('logggg');
         var children = this.getChildren();
         var testObjs = new Array();
-        var particles = new Array();
         var leftDataPacketCount = 0;
         for (let index in children) {
             var child = children[index];
@@ -207,8 +220,6 @@ var GameLayer = cc.LayerColor.extend({
                 if (child.isType("DataPacket")) {
                     leftDataPacketCount ++;
                 }
-            } else if (child.isClass("LazerParticle")) {
-                particles.push(child);
             }
         }
         if (totalDataPacketCount > 0 && leftDataPacketCount <= 0) {
@@ -216,10 +227,11 @@ var GameLayer = cc.LayerColor.extend({
             location.reload();
             return;
         }
-        for (let pIndex in particles) {
-            var parti = particles[pIndex];
-            parti.testWithObjects(testObjs);
-        }    
+        var particle = sharedLazerParticle;
+        if (particle) {
+            particle.testWithObjects(testObjs);
+        }
+          
     },
 });
 
@@ -470,7 +482,15 @@ var AutoReflector = BaseReflector.extend({
         var shootingVector = zz.pointRotateVector(cc.p(shootingOffset, 0), zRota);
         var shootingPoint = zz.pointOffset(this.getPosition(), shootingVector.x, shootingVector.y);
         return zz.line(shootingPoint.x, shootingPoint.y, zRota);
-    }
+    },
+    getRect:function() {
+        if (this._dying) {
+            return cc.rect(0, 0, 0, 0);
+        }
+        var rect = this._super();
+        var shrink = rect.width * 0.15;
+        return zz.rectInset(rect, shrink, shrink);
+    },
 });
 
 let packetLife = 150.0;
@@ -510,11 +530,11 @@ var BasePacket = BaseSprite.extend({
                 explos.setScale(0.5);
                 var spawn = cc.spawn(cc.scaleTo(0.25, 1.5), cc.fadeOut(0.25));
                 var finish = cc.callFunc(function(){
-                    explos.removeFromParent();
+                    explos.removeFromParent(true);
                 });
                 explos.runAction(cc.sequence(spawn, finish));
             }
-            this.removeFromParent();
+            this.removeFromParent(true);
             this.didFinishCrash();
         }
     },
@@ -549,6 +569,12 @@ var FirePacket = BasePacket.extend({
     },
     didFinishCrash:function() {
         currentDiedTime ++;
+        paused = true;
+        var delay = cc.delayTime(2);
+        var finish = cc.callFunc(function(){
+            paused = false;
+        });
+        currentGameLayer.runAction(cc.sequence(delay, finish));
     }
 });
 
@@ -577,25 +603,34 @@ var LazerSource = BaseSprite.extend({
     run:function() {
         // shoot a LazerParticle
         if (this.disabled == 0) {
-            var particle = new LazerParticle(this.getRotation());
-            var originPo = this.getPosition();
-            var newPosi = zz.pointOffset(originPo, this.getSize().width / 2 + 10, 0);
-            var rotatedPosi = zz.pointRotatePoint(newPosi, originPo, this.getRotation());
-            particle.setPosition(rotatedPosi);
-            this.getParent().addChild(particle, 100);
+            if (sharedLazerParticle == null) {
+                var particle = new LazerParticle(this.getRotation());
+                var originPo = this.getPosition();
+                var newPosi = zz.pointOffset(originPo, this.getSize().width / 2 + 10, 0);
+                var rotatedPosi = zz.pointRotatePoint(newPosi, originPo, this.getRotation());
+                particle.setPosition(rotatedPosi);
+                this.getParent().addChild(particle, 100);
+                sharedLazerParticle = particle;
+            }
         }
     }
 });
 
 var turningRed = false;
+var paused = false;
+var sharedLazerParticle = null;
 
 var LazerParticle = cc.Node.extend({
     _className:"LazerParticle",
-    _drawed:false,
+    // _drawed:false,
     _realZRotation:0,
+    _cacheLines:null,
+    _cacheSpark:null,
     ctor:function(zRotation) {
         this._super();
         this._realZRotation = zRotation;
+        this._cacheLines = new Array();
+        this._cacheSpark = new BaseSprite("Textures/LazerSpark.png");
     },
     getClassName:function() {
         return this._className;
@@ -603,15 +638,21 @@ var LazerParticle = cc.Node.extend({
     isClass:function(className) {
         return (this.getClassName() == className);
     },
-    testWithObjects:function(objects) { 
-        if (this._drawed) {
-            this.removeFromParent();
-            // console.log("remove:" + this);
+    hideAllLazerLines:function() {
+        var lines = this._cacheLines;
+        for (let i in lines) {
+            var li = lines[i];
+            li.removeFromParent(true);
+        }
+        if (this._cacheSpark.getParent) {
+            this._cacheSpark.removeFromParent(true);
+        }
+    },
+    testWithObjects:function(objects) {
+        this.hideAllLazerLines();
+        if (paused) {
             return;
         }
-        this._drawed = true;
-        // console.log("test:" + this);
-        // do logic
 
         var parentSize = cc.director.getWinSize();
         var parentRect = cc.rect(0, 0, parentSize.width, parentSize.height);
@@ -623,7 +664,7 @@ var LazerParticle = cc.Node.extend({
         var testTime = 0;
         while(!ended) {
             testTime ++;
-            if (testTime > 100) {
+            if (testTime > 50) {
                 ended = true;
                 break;
             }
@@ -638,6 +679,9 @@ var LazerParticle = cc.Node.extend({
                     continue;
                 }
                 var testRect = tSpr.getRect();
+                if (!zz.rectIntersectsLine(testRect, lastLine)) {
+                    continue; // don't check too much if not a chance!
+                }
                 var testHitPoint = zz.pointIntersectionFromRectToLine(testRect, lastLine);
                 var testWillBeReflected = false;
                 var testReflectedLine = zz.line(0, 0, 0);
@@ -684,7 +728,6 @@ var LazerParticle = cc.Node.extend({
                 // if packet
                 if (lastHitSpr) {
                     lastHitSpr.getHurt();
-
                 }
                 ended = true;
                 this.drawSparkAtPoint(thisHitPoint, lastLine);
@@ -707,26 +750,47 @@ var LazerParticle = cc.Node.extend({
         var distance = zz.distanceFromPoints(fp, tp);
         var zRotation = atan2(fp.y - tp.y, fp.x - tp.x);
 
-        var lazer = new BaseSprite("Textures/LazerParticle.png");
+        var lazer = null;
+        for (let i in this._cacheLines) {
+            var li = this._cacheLines[i];
+            if (li.getParent() == null) {
+                lazer = li;
+                break;
+            }
+        }
+        if (lazer == null) {
+            lazer = new BaseSprite("Textures/LazerParticle.png");
+            lazer.setScaleY(0.4);
+            this._cacheLines.push(lazer);
+        }
         lazer.setRotation(zRotation);
         lazer.setPosition(center);
         lazer.setScaleX(distance / OBJ_BLOCK_WIDTH);
-        lazer.setScaleY(0.4);
-        lazer.setColor(this.getTintColor());
+        this.tintLazerObjectIfNeed(lazer);
         this.addChild(lazer);
+        // console.log("cachedLines:" + this._cacheLines.length);
     },
     drawSparkAtPoint:function(atPoint, fromLine) {
-        var pointer2 = new BaseSprite("Textures/LazerSpark.png");
+        var pointer2 = this._cacheSpark;
         pointer2.setRotation(fromLine.alpha + cc.randomMinus1To1() * M_PI * 0.1);
         pointer2.setPosition(zz.pointOffset(atPoint, -this.getPosition().x, -this.getPosition().y));
         pointer2.setScaleY(cc.randomMinus1To1() > 0 ? 1 : -1);
-        pointer2.setColor(this.getTintColor());
-        this.addChild(pointer2);
+        this.tintLazerObjectIfNeed(pointer2);
+        if (this._cacheSpark.getParent() == null) {
+            this.addChild(pointer2);
+        }  
+    },
+    tintLazerObjectIfNeed:function(object) {
+        // return;
+
+        // if (object) {
+        //     object.updateDisplayedColor(this.getTintColor());
+        // }
     },
     getTintColor:function() {
         if (turningRed) {
-            return cc.color(255, 0, 0, 255);
+            return cc.color(200, 0, 0, 255);
         }
-        return cc.color(0, 255, 255, 255);
+        return cc.color(0, 200, 200, 255);
     }
 });

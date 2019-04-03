@@ -83,6 +83,30 @@ zz.rectInset = function(rect, dx, dy) {
 }
 
 // intersetion
+
+zz.rectIntersectsLine = function(rect, line) {
+    var rectOrginPoint = cc.p(rect.x, rect.y);
+    var rectDiagonalPoint = cc.p(rect.x + rect.width, rect.y + rect.height);
+
+    var li1 = zz.line(rectOrginPoint.x, rectOrginPoint.y, 0);
+    var li2 = zz.line(rectOrginPoint.x, rectOrginPoint.y, M_PI_2);
+    var li3 = zz.line(rectDiagonalPoint.x, rectDiagonalPoint.y, 0);
+    var li4 = zz.line(rectDiagonalPoint.x, rectDiagonalPoint.y, M_PI_2);
+
+    var biggerRect = zz.rectInset(rect, -1, -1);
+
+    var lines = new Array(li1, li2, li3, li4);
+
+    for (let i in lines) {
+        var tl = lines[i];
+        var intersectPoint = zz.pointIntersectionFromLines(tl, line);
+        if (cc.rectContainsPoint(biggerRect, intersectPoint)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 zz.pointIntersectionFromLines = function(line1, line2) {
     var k1 = tan(line1.alpha);
     var k2 = tan(line2.alpha);
