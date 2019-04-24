@@ -1,6 +1,9 @@
 ### 我的一些小游戏
 [吃泡泡5](/bubble5js/)
 
+### my mp3 ?
+[mp3](/article/mp3_test.md)
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/ZJamm1993/zjam.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
