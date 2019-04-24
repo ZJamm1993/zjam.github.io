@@ -1,3 +1,5 @@
+# 动手做一个iOS音乐播放器（2）AVAudioPlayer与AVAudioEngine
+
 AVAudioPlayer播放音频的方法是最简单的，传入一个url或data初始化，然后play、pause、stop、currentTime等操作直接调用，还有播放完成后的代理回调，真是方便。
 但也有局限性，它不能做一些例如混响、均衡器等处理。
 
