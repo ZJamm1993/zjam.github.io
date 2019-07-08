@@ -4,6 +4,7 @@
 ### 我的一些文章 ?
 - [AVAudioEngine的使用](/article/engine.md)
 - [AVAudioUnitEQ的使用](/article/eq.md)
+- [Markdown语法](/article/githubmarkdown.md)
 
 ## Welcome to GitHub Pages
 
