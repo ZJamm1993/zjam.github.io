@@ -29,10 +29,10 @@ AVAudioPlayer播放音频的方法是最简单的，传入一个url或data初始
 
 
 其中AVAudioPlayerNode是音源，AVAudioUnitEffect是效果器，最后mix和输出由engine完成
-![AVAudioEngine的其中一种连接方法](https://upload-images.jianshu.io/upload_images/11381603-7b75ba993f47f8f6.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![AVAudioEngine的其中一种连接方法](11381603-7b75ba993f47f8f6.png)
 
 这套工具的用法非常贴近生活，而且有点眼熟。。。。就像下图👇中的样子。
-![就是这个感觉](https://upload-images.jianshu.io/upload_images/11381603-aec4356e5cf74966.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![就是这个感觉](11381603-aec4356e5cf74966.jpg)
 
 那么我就用MyAudioPlayer来封装这套AVAudioEngine逻辑：
 

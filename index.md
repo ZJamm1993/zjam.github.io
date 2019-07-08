@@ -1,8 +1,9 @@
 ### 我的一些小游戏
-[吃泡泡5](/bubble5js/)
+- [吃泡泡5](/bubble5js/)
 
-### my mp3 ?
-[mp3](/article/mp3_test.md)
+### 我的一些文章 ?
+- [AVAudioEngine的使用](/article/engine.md)
+- [AVAudioUnitEQ的使用](/article/eq.md)
 
 ## Welcome to GitHub Pages
 
