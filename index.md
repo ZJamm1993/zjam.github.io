@@ -1,7 +1,10 @@
+# 张景健的Github主页
+
 ### 我的一些小游戏
 - [吃泡泡5](/bubble5js/)
 
 ### 我的一些文章 ?
+- [我的简书主页](https://www.jianshu.com/u/8515b5800ff1)
 - [AVAudioEngine的使用](/article/engine.md)
 - [AVAudioUnitEQ的使用](/article/eq.md)
 - [Markdown语法](/article/githubmarkdown.md)
