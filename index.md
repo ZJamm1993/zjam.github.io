@@ -17,7 +17,8 @@
 
 - [网络图片下载缓存库](https://github.com/ZJamm1993/ZZWebImage)
 
-  - 使用NSURLCache实现图片数据缓存。
+  - 用于替代复杂的SDWebImage库。
+  - 使用NSURLSession下载图片，NSURLCache缓存图片数据。
 
 - [Change（仿制）](https://github.com/ZJamm1993/Change2)
   
