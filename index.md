@@ -1,12 +1,15 @@
 # 张景健的Github主页
 
-## 我的第一个网页小游戏
+## 我的简书主页
+
+### [我的简书主页](https://www.jianshu.com/u/8515b5800ff1)
+
+## 我的一些网页小游戏
 
 - [吃泡泡5](/bubble5js/)
 
 ## 我的一些文章
 
-- [我的简书文章](https://www.jianshu.com/u/8515b5800ff1)
 - [AVAudioEngine的使用](/article/engine.md)
 - [AVAudioUnitEQ的使用](/article/eq.md)
 - [Markdown语法](/article/githubmarkdown.md)
@@ -31,6 +34,8 @@
   - 使用AVAudioEngine实现核心播放功能，附带AVAudioUnitEQ均衡器。
   - 相关[文章](https://www.jianshu.com/c/c677ebd368ea)
 
+  ![截图](/imgs/mux_screenshot.png)
+
 - [CoreML demo](https://github.com/ZJamm1993/CoreML_DEMO)
 
   - 首次接触CoreML，接入现成的Model文件。
@@ -42,14 +47,20 @@
   
   - 首次学习2D游戏，使用了cocos2d-objc实现。
 
+  ![截图](/imgs/thisplane_screenshot.png)
+
 - [打泡泡小游戏（仿制）](https://github.com/ZJamm1993/GTA5Doomsday3HackerGame)
 
   - 仿制GTA5某关卡的内置小游戏，调整反光镜控制光线击破目标，SpriteKit实现。
   - 另有cocos2d-js实现的网页版[(玩玩)](/bubble5js/)[(源码)](https://github.com/ZJamm1993/bubble5js)
 
+  ![截图](/imgs/bubble5_screenshot.png)
+
 - [重力存亡小游戏（仿制）](https://github.com/ZJamm1993/thisarrow)
 
   - 仿制《重力存亡v1》游戏，使用重力感应控制角色击破目标，SpriteKit实现。
+
+  ![截图](/imgs/thisarrow_screenshot.png)
 
 ### Python、OpenCV 项目
 
@@ -72,6 +83,8 @@
 
   - 使用OpenCV修改原视频风格，并生成新视频。
   - 使用了一些Numpy数组的快速操作。使用了命令调用FFMpeg。
+
+  ![截图](/imgs/vhs_screenshot.png)
 
 ## 以下为默认内容
 
