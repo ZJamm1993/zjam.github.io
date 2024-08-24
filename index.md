@@ -1,27 +1,10 @@
 # 张景健的Github主页
 
-- [我的掘金主页](https://juejin.cn/user/3492523486752295/posts)
-- [我的简书主页](https://www.jianshu.com/u/8515b5800ff1)
-
-## 我的一些网页小游戏
-
-- [吃泡泡5](/bubble5js/)
-
-## 我的一些文章
-
-- [AVAudioEngine的使用](/article/engine.md)
-- [AVAudioUnitEQ的使用](/article/eq.md)
-- [Markdown语法](/article/githubmarkdown.md)
-
-## 我的一些项目
-
-### iOS app 项目
-
 #### New ！
 
 - [MyJSONable](https://github.com/zjam9333/MyJSONable)
 
-  - Swift的JSON转model库
+  - Swift的JSON转model库，基于KVC和Swift宏
   - 完全取代HandyJSON，类型安全
 
 ```swift
@@ -39,6 +22,66 @@ struct Animal2: JSONable {
 var animal = Animal2(fromJson: json)
 let json2 = animal.encodeToJson()
 ```
+
+- [适用于UIView的声明式写法](https://github.com/zjam9333/LazyFish)
+  - （写于2021年，当年大多数项目最低支持版本还在iOS9，无法使用swiftUI，便异想天开创建了这个库）
+  - 使用swift的resultbuilder实现声明式写法
+  - 适用于简单的view布局
+  - 支持iOS9，可以在全面改写swiftui之前作为轻度替代
+
+```swift
+// 普通view写法
+self.view.arrangeViews {
+    UILabel()
+        .text("Hello World")
+        .alignment(.center)
+}
+```
+
+```swift
+// 简单tableview写法
+@State var arr1: String = ["Dog", "Cat", "Fish"]
+var arr2: String = ["Tom", "Jerry", "Butch"]
+
+UITableView(style: .grouped) {
+    // dynamic section
+    TableViewSection(binding: $arr1) { item in
+        UILabel()
+            .text("dynamic row: \(item)")
+            .alignment(.leading, value: 20)
+            .alignment(.centerY)
+    } action: { [weak self] item in
+        // did selected cell
+    }
+
+    // staic section
+    TableViewSection(arr2) { item in
+        UILabel()
+            .text("static row: \(item)")
+            .alignment(.leading, value: 20)
+            .alignment(.centerY)
+    }
+}
+```
+
+## 我的一些主页
+
+- [我的掘金主页](https://juejin.cn/user/3492523486752295/posts)
+- [我的简书主页](https://www.jianshu.com/u/8515b5800ff1)
+
+## 我的一些网页小游戏
+
+- [吃泡泡5](/bubble5js/)
+
+## 我的一些文章
+
+- [AVAudioEngine的使用](/article/engine.md)
+- [AVAudioUnitEQ的使用](/article/eq.md)
+- [Markdown语法](/article/githubmarkdown.md)
+
+## 我的一些项目
+
+### iOS app 项目
 
 #### Old
 
